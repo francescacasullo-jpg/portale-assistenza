@@ -24,4 +24,4 @@
 // E' per questo che sta in un file da solo, e non sparso dentro app.js.
 // ============================================================================
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://studious-disco-xrrv994jpw64hvpgq-8000.app.github.dev";

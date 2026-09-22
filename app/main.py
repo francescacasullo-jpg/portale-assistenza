@@ -6,7 +6,7 @@ Endpoint:
   GET    /tickets             -> lista (filtro opzionale ?status=aperto)
   GET    /tickets/{id}        -> un ticket, 404 se non c'e'
   POST   /tickets             -> crea (richiede X-API-Key)
-  PUT    /tickets/{id}        -> DA SCRIVERE
+  PUT    /tickets/{id}        -> aggiorna (richiede X-API-Key)
   DELETE /tickets/{id}        -> cancella (richiede X-API-Key)
 
 Al primo avvio il database viene creato e riempito con i tre ticket di esempio
@@ -91,25 +91,25 @@ def get_ticket(ticket_id: int):
 
 
 @app.post("/tickets", status_code=201, dependencies=[Depends(require_api_key)])
-async def create_ticket(request: Request):
-    """Crea un nuovo ticket.
-
-    Prende il JSON che arriva e lo salva.
-    """
-    dati = await request.json()
+def create_ticket(ticket: TicketIn):
+    """Crea un nuovo ticket."""
     return db.create_ticket(
-        dati.get("title", ""),
-        dati.get("description", ""),
-        dati.get("status", "aperto"),
+        ticket.title,
+        ticket.description,
+        ticket.status,
     )
 
 
-# TODO — Manca PUT /tickets/{ticket_id}.
-# Il menu "stato" del frontend lo chiama e si prende un 405: il metodo non
-# esiste. Scriverlo e' il vostro lavoro: db.update_ticket() c'e' gia'.
+@app.put("/tickets/{ticket_id}", response_model=TicketOut, dependencies=[Depends(require_api_key)])
+def update_ticket(ticket_id: int, ticket: TicketIn):
+    """Aggiorna un ticket esistente. 404 se quell'id non c'e'."""
+    aggiornato = db.update_ticket(ticket_id, ticket.title, ticket.description, ticket.status)
+    if aggiornato is None:
+        raise HTTPException(status_code=404, detail="Ticket non trovato")
+    return aggiornato
 
 
-@app.delete("/tickets/{ticket_id}", status_code=204)
+@app.delete("/tickets/{ticket_id}", status_code=204, dependencies=[Depends(require_api_key)])
 def delete_ticket(ticket_id: int):
     """Cancella un ticket. 204 vuol dire "fatto, e non ho niente da dirti"."""
     if not db.delete_ticket(ticket_id):
