@@ -29,8 +29,10 @@ from app.models import TicketIn, TicketOut, TicketStatus
 
 load_dotenv()
 
-# La chiave che protegge le scritture.
-API_KEY = "chiave-del-corso-2026"
+# La chiave che protegge le scritture. Arriva da .env, non e' scritta qui.
+API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    raise RuntimeError("Manca API_KEY: copia .env.example in .env e imposta una chiave.")
 
 app = FastAPI(title="Portale Ticket", version="1.0")
 
