@@ -69,7 +69,7 @@ def health():
 
 
 @app.get("/tickets")
-def list_tickets(status: Optional[str] = Query(default=None)):
+def list_tickets(status: Optional[TicketStatus] = Query(default=None)):
     """La lista dei ticket, eventualmente filtrata per stato."""
     return db.list_tickets(status)
 
